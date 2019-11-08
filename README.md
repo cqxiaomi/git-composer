@@ -6,7 +6,9 @@ php+vue+element ui实现代码同步工具 远程包管理工具
 ### 代码托管
 | 名称   | 地址                                       |
 | ------ | ----------------------------------------- |
-| github |https://github.com/cqxiaomi/git-composer.git |
+| github |https://github.com/cqxiaomi/git-composer.git|
+| gitee  |https://gitee.com/cqxiaomi/git-composer.git |
+
 ---
 
 #  安装
@@ -45,7 +47,7 @@ php+vue+element ui实现代码同步工具 远程包管理工具
   + ```bash
     $ service php-fpm restart 
     ```
-- 修改 开启git免密pull (http方式)
+- 开启git免密pull (http方式)
    + 创建文件.git-credentials
    + ```bash
        $ cd ~
