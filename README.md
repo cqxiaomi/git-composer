@@ -53,7 +53,7 @@ php+vue+element ui实现代码同步工具 远程包管理工具
        $ cd ~
        $ touch .git-credentials
        $ vim .git-credentials
-       $ http://账号:密码@github.com 
+       $ 添加内容 http://账号:密码@github.com 后保存
      ```
    + 设置配置
    + ```bash
