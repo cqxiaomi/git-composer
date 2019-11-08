@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>git composer 工具</title>
+    <meta http-equiv=Content-Language content=zh-cn>
+    <meta http-equiv=”Content-Type” content=”text/html; charset=gb2312″>
+    <meta name="title" content="git composer tools">
+    <meta name="keywords" content="git,php,composer,git pull,composer require,composer remove,composer update,vue,php开发助手">
+    <meta name="description" content="代码同步工具,composer工具">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+    .text {
+        font-size: 14px;
+    }
+
+    .item {
+        padding: 18px 0;
+    }
+
+    .box-card {
+        width: 200px;
+        margin: 25px;
+    }
+
+    .project {
+        float: left;
+    }
+
+    [v-cloak] {
+        display: none;
+    }
+
+    .el-notification {
+        width: auto;
+    }
+
+    .el-dialog__footer {
+        text-align: center;
+    }
+
+    .el-dialog {
+        width: 20%;
+    }
+
+    .el-dialog__body {
+        padding-top: 5%;
+        padding-right: 20%;
+    }
+
+    .el-loading-mask {
+        position: fixed;
+    }
+
+    #app {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-align-items: center;
+        align-items: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        padding: 5%;
+    }
+
+
+</style>
+<body>
+<div id="app" v-loading="loading" element-loading-text="正在执行" element-loading-spinner="el-icon-loading"
+     element-loading-background="rgba(0, 0, 0, 0.8)">
+    <div v-for="val in list" class="project" v-cloak>
+        <el-card class="box-card">
+            <el-tag>{{val}}</el-tag>
+            <div v-for="(v,k) in operate" :key="k" class="text item">
+                <el-button plain @click="command(val,v,$event)">{{ v.name }}</el-button>
+            </div>
+        </el-card>
+    </div>
+
+    <el-dialog title=" " :visible.sync="dialogFormVisible" :show-close="false">
+        <el-form :model="from" :rules="rules" ref="ruleForm">
+            <el-form-item label="账号" :label-width="formLabelWidth" prop="name">
+                <el-input placeholder="请输入账号" v-model="from.name" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" :label-width="formLabelWidth" prop="password">
+                <el-input placeholder="请输入密码" v-model="from.password" show-password></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" v-cloak>
+            <el-button type="primary" @click="login('ruleForm')">登录</el-button>
+        </div>
+    </el-dialog>
+
+
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                display: '',
+                loading: false,
+                token: '',
+                apiUrl: '/', // http://139.9.225.107:9010/
+                operate: [
+                    {
+                        name: 'git pull',
+                        type: 'git',
+                        action: 'pull'
+                    },
+                    {
+                        name: 'composer update',
+                        type: 'composer',
+                        action: 'update'
+                    },
+                    {
+                        name: 'composer remove',
+                        type: 'composer',
+                        action: 'remove'
+                    },
+                    {
+                        name: 'composer require',
+                        type: 'composer',
+                        action: 'require'
+                    },
+                    {
+                        name: 'cat composer.json',
+                        type: 'command',
+                        action: 'cat'
+                    },
+
+                ],
+                list: [
+                    // 'h5',
+                    // 'api',
+                    // 'admin'
+                ],
+                dialogFormVisible: false,
+                from: {
+                    name: '',
+                    password: ''
+                },
+                formLabelWidth: '120px',
+                rules: {
+                    name: [
+                        {required: true, message: '请输入账号', trigger: 'blur'},
+                        {min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+                    ],
+                    password: [
+                        {required: true, message: '请输入密码', trigger: 'blur'},
+                        {min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur'}
+                    ]
+                }
+            }
+        },
+        methods: {
+            gitList() {
+                //请求数据
+                var api = this.apiUrl + 'command/list';
+                this.$http({
+                    url: api,
+                    method: "GET",
+                    params: {},
+                    headers: {'token': this.token},
+                    emulateJSON: true
+                }).then((response) => {
+                    if (response.body.code == -20) {
+                        this.dialogFormVisible = true;
+                    }
+                    if (response.body.code == 1) {
+                        this.list = response.body.data;
+                    }
+                }, function (err) {
+                    console.log('error', err);
+                })
+            },
+            command(name, params, $event) {
+                var url = this.apiUrl;
+                switch (params.type) {
+                    case 'composer':
+                        url += 'command/composer';
+                        break;
+                    case 'git':
+                        url += 'command/git';
+                        break;
+                    case 'command':
+                        url += 'command/command';
+                        break;
+                    default:
+                        break;
+
+                }
+                var data = {
+                    name: name,
+                    action: params.action
+                };
+                if (params.action == 'require' || params.action == 'remove') {
+                    this.getPack(url, data);
+                    return true;
+                } else {
+                    this.execute(url, data);
+                }
+
+            },
+            execute(url, data) {
+                this.loading = true;
+                this.$http.post(url, data, {
+                    emulateJSON: true,
+                    headers: {'token': this.token}
+                }).then((response) => {
+                    this.loading = false;
+                    if (response.body.code == -20) {
+                        this.dialogFormVisible = true;
+                    }
+                    if (response.body.code == 1) {
+                        this.$notify({
+                            title: '成功',
+                            dangerouslyUseHTMLString: true,
+                            offset: 100,
+                            message: '<pre >' + response.body.data.info + '</pre>'
+                        });
+                    } else {
+                        this.$message.error('执行异常!!!');
+                        this.$notify({
+                            title: '错误详情',
+                            dangerouslyUseHTMLString: true,
+                            offset: 100,
+                            message: '<pre >' + response.body.msg + '</pre>'
+                        });
+                    }
+                }, function (err) {
+                    this.loading = false;
+                    console.log('error', err);
+                })
+            },
+            login(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var api = this.apiUrl + 'open/login';
+                        var data = {
+                            name: this.from.name,
+                            password: this.from.password
+                        };
+                        this.$http.options.emulateJSON = true;
+                        this.$http.post(api, data, {
+                            emulateJSON: true,
+                            headers: {'token': this.token}
+                        }).then((response) => {
+                            if (response.body.code == 1) {
+                                this.token = response.body.data.token;
+                                localStorage.setItem("Token", response.body.data.token);
+                                this.dialogFormVisible = false;
+                                if (this.list.length == 0) {
+                                    this.gitList();
+                                }
+                            } else {
+                                localStorage.removeItem("Token");
+                                this.$message.error(response.body.msg);
+                            }
+
+                        }, function (err) {
+                            console.log('error', err);
+                        })
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            getPack(url, data) {
+                this.$prompt('请输入包名称', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern: /\S/,
+                    inputErrorMessage: '包名称不正确'
+                }).then(({value}) => {
+                    data.package_name = value;
+                    this.execute(url, data);
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '取消输入'
+                    });
+                });
+            },
+        },
+        mounted() {
+            this.token = localStorage.getItem("Token");
+            if (!this.token) {
+                this.dialogFormVisible = true;
+            }
+            this.gitList();
+        }
+
+    })
+</script>
+</html>
