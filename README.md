@@ -61,10 +61,14 @@ php+vue+element ui实现代码同步工具 远程包管理工具
      ```
 >说明：git免密pull 也可以通过SSH方式实现,具体移步谷歌/百度
 
-## 安装
-####自定端口
+## 安装 
+- 端口可以自定义
 ```bash
-$ php -S 0.0.0.0:8888 index.php
+$ php -S 0.0.0.0:8888 index.php 
+```
+#####后台运行
+```bash
+$ nohup php -S 0.0.0.0:8888 index.php &
 ```
 # 功能列表
 
