@@ -66,7 +66,7 @@ php+vue+element ui实现代码同步工具 远程包管理工具
 ```bash
 $ php -S 0.0.0.0:8888 index.php 
 ```
-#####后台运行
+##### 后台运行
 ```bash
 $ nohup php -S 0.0.0.0:8888 index.php &
 ```
