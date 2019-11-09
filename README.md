@@ -76,9 +76,9 @@ $ nohup php -S 0.0.0.0:8888 index.php &
 - [x] composer update -- 完成
 - [x] composer remove -- 完成
 - [x] cat composer.json -- 完成
-- [x] git pull --完成
+- [x] git pull -- 完成
 
-#效果图
+# 效果图
 ![](001.png)
 ![](002.png)
 ![](003.png)
